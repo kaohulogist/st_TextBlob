@@ -6,6 +6,9 @@ from PIL import Image
 from newspaper import Article
 from textblob import Word
 import nltk
+import pandas as pd
+import plotly.express as px
+
 nltk.download('omw-1.4')
 
 with open("style.css") as f:
@@ -17,7 +20,7 @@ col2.image(Image.open('KH.jpg'))
 
 st.markdown('''
 ## Natural Language Processing Web Application
-- **Python libraries:** streamlit, textblob, PIL, playsound
+- **Python libraries:** streamlit, textblob, PIL, playsound, pandas, plotly.express
 
 ''')
 
@@ -35,6 +38,36 @@ if st.sidebar.button('definitions'):
     for word in blob_user_words_input.words:
         w = Word(word.lower())
         st.write(w.definitions)
-    
+if st.sidebar.button('correct'):
+    st.write(blob_user_words_input.correct())
+if st.sidebar.button('spellcheck'):
+    for word in blob_user_words_input.words:
+        w = Word(word.lower())
+        st.write(w.spellcheck())
+
 user_url_input = st.sidebar.text_input('Please enter the URL')
+
+def articleDownload(url):
+    url = user_url_input
+    article = Article(url)
+    article.download()
+    article.parse()
+    text = article.text
+    return text
+
+amount_word = st.sidebar.slider('Amount of words')
+if st.sidebar.button('plot words frequency from url'):
+    blob = TextBlob(articleDownload(user_url_input))
+    frequency = pd.DataFrame.from_dict(
+        blob.word_counts, orient='index', columns=['count']
+    )
+    plot = px.bar(
+        frequency.sort_values(by='count', ascending=False)
+    )
+    st.dataframe(frequency.sort_values(by=['count'], ascending=False).transpose())
+    st.area_chart(frequency[:amount_word])
+
+
+
+
 
