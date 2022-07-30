@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run timer-app.py
+web: sh setup.sh && streamlit TextBlob-app.py
